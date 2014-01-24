@@ -84,6 +84,41 @@ final class Demo_Lock {
 	
 	}
 	
+  public static function activate() {
+    global $demovars;
+
+    $role_name = $demovars['role'];
+    $role = get_role( $role );
+
+    if (isset($role)) {
+    }
+    else {
+      // role does not exist, create it
+
+      // Assign the read capability to this role.
+    }
+
+    if (username_exists($demovars['username'])) {
+      // get the userid of existing user
+    }
+    else {
+      // create a new user
+    }
+
+    // assign demo user the role
+
+  }
+
+  public static function deactivate() {
+    global $demovars;
+
+    $keep_user_active = $demovars["keepuserenabled"];
+
+    if (isset($keep_user_active) && $keep_user_active === true) {
+      // Deactivate demo user
+    }
+  }
+
 	/**
 	 * In this method, we set any filters or actions and start modifying
 	 * our user to have the correct permissions for demo usage.
@@ -91,39 +126,78 @@ final class Demo_Lock {
 	 * @since 1.0.0
 	 */
 	public function init() {
-	
+    // Show only if demouser is active
+    add_filter( 'login_message', array( $this, 'login_message' ) );
+    add_filter( 'allow_password_reset', array( $this, 'allow_password_reset' ) );
+    add_action( 'login_head', array( $this, 'login_head' ) );
+    add_filter( 'login_errors', array( $this, 'login_errors' ) );
+
 		/** Don't process anything unless the current user is a demo user */
-		if ( $this->is_demo_user() ) {
+		if ( !$this->is_demo_user() ) {
+      return;
+    }
 
-			foreach ($this->config['role'] as $role) {
-				/** Setup capabilities for user roles */
-				$this->role = get_role( $role );
+    foreach ($this->config['role'] as $role) {
+      /** Setup capabilities for user roles */
+      $this->role = get_role( $role );
 
-				/** Add capabilities to the user */
-				foreach ( $this->config['allow_capabilites'] as $cap ) {
-					if ( ! current_user_can( $cap ) ) {
-						$this->role->add_cap( $cap );
-					}
-				}
-			}
+      /** Add capabilities to the user */
+      foreach ( $this->config['allow_capabilites'] as $cap ) {
+        if ( ! current_user_can( $cap ) ) {
+          $this->role->add_cap( $cap );
+        }
+      }
+    }
 
-			/** Load hooks and filters */
-			add_action( 'wp_loaded', array( $this, 'cheatin' ) );
-			add_action( 'admin_init', array( $this, 'admin_init' ), 11 );
-			add_filter( 'login_redirect', array( $this, 'redirect' ) );
-			add_filter( 'login_message', array( $this, 'login_message' ) );
-			add_action( 'wp_dashboard_setup', array( $this, 'dashboard' ), 100 );
-			add_action( 'admin_menu', array( $this, 'remove_menu_items' ) );
-      add_action( 'admin_menu', array( $this, 'adjust_menu_items' ), 9 );
-			add_action( 'wp_before_admin_bar_render', array( $this, 'admin_bar' ) );
-			add_action( 'admin_footer', array( $this, 'jquery' ) );
-			add_filter( 'admin_footer_text', array( $this, 'footer' ) );
-			add_action( 'wp_footer', array( $this, 'jquery' ), 1000 );
-		}
+    /** Load hooks and filters */
+    add_action( 'wp_loaded', array( $this, 'cheatin' ) );
+    add_action( 'admin_init', array( $this, 'admin_init' ), 11 );
+    add_filter( 'login_redirect', array( $this, 'redirect' ) );
+    add_action( 'wp_dashboard_setup', array( $this, 'dashboard' ), 100 );
+    add_action( 'admin_menu', array( $this, 'remove_menu_items' ) );
+    add_action( 'admin_menu', array( $this, 'adjust_menu_items' ), 9 );
+    add_action( 'wp_before_admin_bar_render', array( $this, 'admin_bar' ) );
+    add_action( 'admin_footer', array( $this, 'jquery' ) );
+    add_filter( 'admin_footer_text', array( $this, 'footer' ) );
+    add_action( 'wp_footer', array( $this, 'jquery' ), 1000 );
+
+    /*
+    TODOs:
+
+    Disable wordpress version: When you login to admin area, you can see the wordpress version in the footer.
+                               We do not want this for demo user.
+    Disable wordpress notifications: When you login to admin area, you can see update wordpress notification
+                                     if your wordpress version is not the latest. This notification should not be visible
+                                     to demo user.
+
+    */
 
 	}
-	
-	/**
+
+  /******************************************* Remove Reset Password Feature ******************************************/
+  // From: http://wordpress.org/support/topic/how-to-disable-password-reset-feature
+  function allow_password_reset() {
+    return false;
+  }
+
+  function remove_password_reset_text ( $text ) {
+    if ( $text == 'Lost your password?' ) {
+      $text = '';
+    }
+    return $text;
+  }
+
+  function login_head() {
+    add_filter( 'gettext', array( $this, 'remove_password_reset_text' ) );
+  }
+
+  function login_errors( $text ) {
+    return str_replace( 'Lost your password</a>?', '</a>', $text );
+  }
+  /********************************************************************************************************************/
+
+
+  /**
 	 * Make sure users don't try to access an admin page that they shouldn't.
 	 *
 	 * @since 1.0.0
@@ -200,15 +274,16 @@ final class Demo_Lock {
 	
 		global $pagenow;
 		$layout = get_user_option( 'screen_layout_dashboard', get_current_user_id() );
-		wp_add_dashboard_widget('dashboard_widget', $this->config['plugin_title'], 'dashboard_widget_function');
+		wp_add_dashboard_widget('dashboard_widget', $this->config['plugin_title'], array('Demo_Lock', 'dashboard_widget_function'));
 		/** Set the screen layout to one column in the dashboard */
 		if ( 'index.php' == $pagenow && 1 !== $layout )
 			update_user_option( get_current_user_id(), 'screen_layout_dashboard', 1, true );
 			
 		/** Remove dashboard widgets from view */
-		
-		for ($i =0; $i < count($this->config['remove_meta_box']); $i++) {
-			remove_meta_box($this->config['remove_meta_box'][$i][0], $this->config['remove_meta_box'][$i][1], $this->config['remove_meta_box'][$i][2]);
+		$meta_boxes = $this->config['remove_meta_box'];
+		for ($i =0; $i < count($meta_boxes); $i++) {
+      $mb = $this->config['remove_meta_box'][$i];
+			remove_meta_box($mb[0], $mb[1], $mb[2]);
 		}
 	}
 	
@@ -232,8 +307,9 @@ final class Demo_Lock {
 	
 		while ( prev( $menu ) ) {
 			$item = explode( ' ', $menu[key( $menu )][0] );
-			if ( in_array( $item[0] != null ? $item[0] : '', $remove_menu_items ) )
+			if ( in_array( $item[0] != null ? $item[0] : '', $remove_menu_items ) ) {
 				unset( $menu[key( $menu )] );
+      }
 		}
 		foreach($this->config['remove_submenu'] as $key => $val) {
 			if (is_array($val)) {
@@ -241,7 +317,7 @@ final class Demo_Lock {
 					remove_submenu_page($key, $subval);
 				}
 			} else {
-				remove_submenu_page($key, $val);
+        remove_submenu_page($key, $val);
 			}
 		}
 	}
@@ -357,7 +433,7 @@ final class Demo_Lock {
 
     global $demovars;
 
-    return ($current_user->data->user_login == $demovars['username']);
+    return ($current_user->data->user_login == $this->config['username']);
 	}
 	
 	/**
@@ -377,11 +453,20 @@ final class Demo_Lock {
 		return false;
 	}
 
+
+  // Function that outputs the contents of the dashboard widget
+  public static function dashboard_widget_function() {
+    global $demovars;
+    echo $demovars['dashboard_text'];
+  }
+
 }
-// Function that outputs the contents of the dashboard widget
-	function dashboard_widget_function() {
-		global $demovars;
-		echo $demovars['dashboard_text'];
-	}
+
+
+// Register hooks that are fired when the plugin is activated and deactivated.
+register_activation_hook( __FILE__, array( 'Demo_Lock', 'activate' ) );
+register_deactivation_hook( __FILE__, array( 'Demo_Lock', 'deactivate' ) );
+
+
 /** Instantiate the class */
 $demolock = new Demo_Lock;

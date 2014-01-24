@@ -15,15 +15,6 @@ Copyright 2013 Colin Hunt (Colin@arcsec.ca)
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
-/*
-TODOs:
-
-Disable wordpress version
-Disable update wordpress notification
-
-*/
-
-
 
 //Global variables for easy customization
 /**Set Plugin Name*/
@@ -36,7 +27,11 @@ $demovars['plugin_file'] = array('google-play-scrapper');
 set the variable below in the format ['getvar']['page'] = 'plugin_name'; set as many getvars as you need */
 $demovars['getvar']['page'] = 'google-play-scrapper-options';
 
+/**Add user roles to set restricted capabilities for*/
+$demovars['role'] = array('admin_demo');
 
+/**Add Capabilities that will be applied to each of the above specified roles*/
+$demovars['allow_capabilites'] = array('manage_options_gps');
 
 /**Set demo login username*/
 $demovars['username'] = 'DemoUser';
@@ -57,12 +52,6 @@ DASH;
 /**Set footer text*/
 $demovars['footer'] = sprintf( __( 'You are currently using a demo of My Plugin. Like what you see? <a href="%s" title="Click here to download!" target="_blank">Download My Plugin today!</a>' ), 'http://mypluginurl.com' );
 
-/**Add user roles to set restricted capabilities for*/
-$demovars['role'] = array('admin_demo');
-
-/**Add Capabilities that will be applied to each of the above specified roles*/
-$demovars['allow_capabilites'] = array('manage_options_gps');
-
 /**Set which php files you want your demo users to be allowed to access*/
 $demovars['allow_pages'] = array('index.php', 'wp-login.php', 'options-general.php', 'admin-ajax.php');
 
@@ -77,15 +66,30 @@ $demovars['menu_modifications'] = array(
   );
 
 /**Set which admin bar items you want to remove*/
-$demovars['remove_node'] = array('wp-logo', 'site-name', 'new-content', 'comments', 'user-info', 'edit-profile');
+$demovars['remove_node'] = array(
+                                  //'wp-logo',
+                                  //'site-name',
+                                  //'new-content',
+                                  //'comments',
+                                  'user-info',
+                                  'edit-profile'
+                                );
 
 /**Set any additional options you want to add to the admin bar. add internal array for each additional node*/
 $demovars['add_node'] = array(
-	array('id' => 'demo_site', 'title' => 'Demo Site', 'href' => home_url())
+	//array('id' => 'demo_site', 'title' => 'Demo Site', 'href' => home_url())
 );
 
 /**Specify which menu items you want to remove*/
-$demovars['remove_menu'] = array( __( 'Posts' ), __( 'Pages' ), __( 'Media' ), __( 'Comments' ), __( 'Profile' ), __( 'Tools' ), __( 'Appearance' ) );
+$demovars['remove_menu'] = array(
+                                  //__( 'Posts' ),
+                                  //__( 'Pages' ),
+                                  //__( 'Media' ),
+                                  //__( 'Comments' ),
+                                  __( 'Profile' ),
+                                  //__( 'Tools' ),
+                                  //__( 'Appearance' )
+                                );
 
 /**Specify which submenu items you want to remove, in the format: [(string) menu] => [(array || string) submenus]*/
 $demovars['remove_submenu'] = array(
@@ -106,5 +110,8 @@ $demovars['remove_meta_box'] = array(
 	array('dashboard_secondary', 'dashboard', 'side')
   //*/
 );
+
+/** Plugin will by default deactivate the demo user. If you don't want so, uncomment the following line.*/
+//$demovars["keepuserenabled"]
 
 ?>
