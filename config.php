@@ -34,22 +34,24 @@ $demovars['getvar']['post_type'] = 'affiliatelink';
 $demovars['role'] = array('affiliate_links_admin');
 
 /**Add Capabilities that will be applied to each of the above specified roles*/
-$demovars['allow_capabilites'] = array( 'manage_options_al',
-                                        'read_post_al',
-                                        'edit_post_al',
-                                        'delete_post_al',
-                                        'edit_post_als',
-                                        'edit_others_post_als',
-                                        'publish_post_als',
-                                        'delete_post_als',
-                                        'delete_private_post_als',
-                                        'delete_published_post_als',
-                                        'delete_others_post_als',
-                                        'edit_private_post_als',
-                                        'edit_published_post_als');
+$demovars['allow_capabilites'] = array(  'manage_options_al'
+                                        ,'read'
+                                        ,'edit_post_al'
+                                        //,'delete_post_al'
+                                        ,'edit_post_als'
+                                        //,'edit_others_post_als'
+                                        //,'publish_post_als'
+                                        //,'delete_post_als'
+                                        //,'delete_private_post_als'
+                                        //,'delete_published_post_als'
+                                        //,'delete_others_post_als'
+                                        //,'edit_private_post_als'
+                                        //,'edit_published_post_als'
+                                        );
 
 /**Set demo login username*/
 $demovars['username'] = 'AffiliateLinksDemo';
+
 
 /**Set demo login password*/
 $demovars['password'] = 'demo123';

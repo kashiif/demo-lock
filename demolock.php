@@ -99,8 +99,17 @@ final class Demo_Lock {
       else {
         // role does not exist, create it
         // and assign the read capability to this role.
-        add_role( $role_name, self::id_to_name( $role_name ), array('read'=> true));
+        $role = add_role( $role_name, self::id_to_name( $role_name ), array('read'=> true));
       }
+
+      /** Add capabilities to the user */
+      foreach ( $demovars['allow_capabilites'] as $cap ) {
+        if ( ! $role->has_cap( $cap ) ) {
+          $role->add_cap( $cap );
+        }
+      }
+
+
     }
 
     $username = $demovars['username'];
@@ -154,18 +163,6 @@ final class Demo_Lock {
 		/** Don't process anything unless the current user is a demo user */
 		if ( !$this->is_demo_user() ) {
       return;
-    }
-
-    foreach ($this->config['role'] as $role) {
-      /** Setup capabilities for user roles */
-      $this->role = get_role( $role );
-
-      /** Add capabilities to the user */
-      foreach ( $this->config['allow_capabilites'] as $cap ) {
-        if ( ! current_user_can( $cap ) ) {
-          $this->role->add_cap( $cap );
-        }
-      }
     }
 
     /** Load hooks and filters */
