@@ -28,7 +28,7 @@ Portions Copyright 2012  Thomas Griffin  (email : thomas@thomasgriffinmedia.com)
 	Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-include_once( plugin_dir_path(__FILE__) . 'config.php' );
+require_once( plugin_dir_path(__FILE__) . 'config.php' );
 
 /**
  * Demo class for the WordPress plugin.
@@ -85,36 +85,55 @@ final class Demo_Lock {
 	}
 	
   public static function activate() {
+    //require_once( plugin_dir_path(__FILE__) . 'config.php' );
+
     global $demovars;
 
-    $role_name = $demovars['role'];
-    $role = get_role( $role );
+    $all_role_names = $demovars['role'];
 
-    if (isset($role)) {
+    foreach($all_role_names as $role_name ) {
+      $role = get_role( $role_name );
+
+      if (isset($role)) {
+      }
+      else {
+        // role does not exist, create it
+        // and assign the read capability to this role.
+        add_role( $role_name, self::id_to_name( $role_name ), array('read'=> true));
+      }
     }
-    else {
-      // role does not exist, create it
 
-      // Assign the read capability to this role.
-    }
-
-    if (username_exists($demovars['username'])) {
+    $username = $demovars['username'];
+    if (username_exists($username)) {
       // get the userid of existing user
+      $user = get_user_by('login', $username);
+      $user_id = $user->ID;
+
+      update_user_meta( $user_id, 'role',  $all_role_names[0]);
     }
     else {
       // create a new user
+      $user_id = wp_insert_user( array(
+            'user_login'  => $username,
+            'user_pass'   => $demovars['password'],
+            'role'        => $all_role_names[0]
+          ) ) ;
     }
-
-    // assign demo user the role
-
   }
+
+  private static function id_to_name ( $id )
+  {
+    $id = str_replace('_', ' ', $id);
+    $id = ucwords($id);
+
+    return $id;
+  }
+
 
   public static function deactivate() {
     global $demovars;
 
-    $keep_user_active = $demovars["keepuserenabled"];
-
-    if (isset($keep_user_active) && $keep_user_active === true) {
+    if (isset($demovars["keepuserenabled"]) && $demovars["keepuserenabled"] === true) {
       // Deactivate demo user
     }
   }
@@ -225,9 +244,16 @@ final class Demo_Lock {
 	public function admin_init() {
 			
 		add_filter( 'screen_options_show_screen', '__return_false' );
-	
+
+    /** Set the filters for allow saving options page*/
+    $target_filters = $this->config['option_page_filters'];
+
+    foreach($target_filters as $option_page => $new_capability) {
+      $handler = new Demo_Lock_Capability_Handler($option_page, $new_capability);
+      add_filter( "option_page_capability_$option_page", array($handler, 'option_page_capability'));
+    }
 	}
-	
+
 	/**
 	 * Redirect the user to the Dashboard page upon logging in.
 	 *
@@ -397,11 +423,7 @@ final class Demo_Lock {
 			});
 		</script>
 		<?php
-		//hide "theme options" from appearance menu, can't seem to make it disappear any other way
-		?>
-		<style>.wp-first-item { display:none; }</style>
-		<?php
-	
+
 	}
 	
 	/**
@@ -428,10 +450,8 @@ final class Demo_Lock {
 
     $current_user = wp_get_current_user();
 
-    if ( empty( $current_user ) )
+    if ( empty( $current_user ) || empty( $current_user->data ))
       return false;
-
-    global $demovars;
 
     return ($current_user->data->user_login == $this->config['username']);
 	}
@@ -462,11 +482,27 @@ final class Demo_Lock {
 
 }
 
+class Demo_Lock_Capability_Handler {
+  private $page;
+  private $capability;
+
+  public function Demo_Lock_Capability_Handler($page, $capability) {
+    $this->page = $page;
+    $this->capability = $capability;
+  }
+
+  public function option_page_capability($capability) {
+    return $this->capability;
+  }
+
+}
+
+
 
 // Register hooks that are fired when the plugin is activated and deactivated.
-register_activation_hook( __FILE__, array( 'Demo_Lock', 'activate' ) );
+register_activation_hook( __FILE__,  array( 'Demo_Lock', 'activate' ) );
 register_deactivation_hook( __FILE__, array( 'Demo_Lock', 'deactivate' ) );
 
 
 /** Instantiate the class */
-$demolock = new Demo_Lock;
+$demolock = new Demo_Lock();

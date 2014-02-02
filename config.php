@@ -16,25 +16,40 @@ Copyright 2013 Colin Hunt (Colin@arcsec.ca)
 	Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
+global $demovars;
+
 //Global variables for easy customization
 /**Set Plugin Name*/
-$demovars['plugin_title'] = 'Google Play Scrapper';
+$demovars['plugin_title'] = 'Affiliate Links';
 
 /**Set the file name(s) that are used to directly access your plugin */
-$demovars['plugin_file'] = array('google-play-scrapper');
+$demovars['plugin_file'] = array('abz-affiliate-links');
 
 /**If you are restricting users to a page with a specific argument, such as themes.php?page=plugin_name,
 set the variable below in the format ['getvar']['page'] = 'plugin_name'; set as many getvars as you need */
-$demovars['getvar']['page'] = 'google-play-scrapper-options';
+$demovars['getvar']['page'] = 'abz-affiliate-links-options';
+$demovars['getvar']['post_type'] = 'affiliatelink';
 
 /**Add user roles to set restricted capabilities for*/
-$demovars['role'] = array('admin_demo');
+$demovars['role'] = array('affiliate_links_admin');
 
 /**Add Capabilities that will be applied to each of the above specified roles*/
-$demovars['allow_capabilites'] = array('manage_options_gps');
+$demovars['allow_capabilites'] = array( 'manage_options_al',
+                                        'read_post_al',
+                                        'edit_post_al',
+                                        'delete_post_al',
+                                        'edit_post_als',
+                                        'edit_others_post_als',
+                                        'publish_post_als',
+                                        'delete_post_als',
+                                        'delete_private_post_als',
+                                        'delete_published_post_als',
+                                        'delete_others_post_als',
+                                        'edit_private_post_als',
+                                        'edit_published_post_als');
 
 /**Set demo login username*/
-$demovars['username'] = 'DemoUser';
+$demovars['username'] = 'AffiliateLinksDemo';
 
 /**Set demo login password*/
 $demovars['password'] = 'demo123';
@@ -53,7 +68,15 @@ DASH;
 $demovars['footer'] = sprintf( __( 'You are currently using a demo of My Plugin. Like what you see? <a href="%s" title="Click here to download!" target="_blank">Download My Plugin today!</a>' ), 'http://mypluginurl.com' );
 
 /**Set which php files you want your demo users to be allowed to access*/
-$demovars['allow_pages'] = array('index.php', 'wp-login.php', 'options-general.php', 'admin-ajax.php');
+$demovars['allow_pages'] = array('index.php', 'wp-login.php', 'options-general.php', 'admin-ajax.php', /* 'edit.php', 'post-new.php',*/ 'options.php');
+
+
+/**filters for saving options*/
+$demovars['option_page_filters'] = array(
+  // filter_name => capability (options.php:43)
+  'abz-affiliate-links-general-settings-group' => 'manage_options_al',
+  'abz-affiliate-links-default-settings-group' => 'manage_options_al'
+);
 
 /**
  * Modify admin menu. Following will change 'Settings' menu capability to 'manage_options_gps'
@@ -62,15 +85,15 @@ $demovars['allow_pages'] = array('index.php', 'wp-login.php', 'options-general.p
  *  $menucfg[1] = 'manage_options_gps';
  **/
 $demovars['menu_modifications'] = array(
-    '80' => array(1, 'manage_options_gps')
+    //'80' => array(1, 'manage_options_al')
   );
 
 /**Set which admin bar items you want to remove*/
 $demovars['remove_node'] = array(
                                   //'wp-logo',
                                   //'site-name',
-                                  //'new-content',
-                                  //'comments',
+                                  'new-content',
+                                  'comments',
                                   'user-info',
                                   'edit-profile'
                                 );
@@ -82,12 +105,12 @@ $demovars['add_node'] = array(
 
 /**Specify which menu items you want to remove*/
 $demovars['remove_menu'] = array(
-                                  //__( 'Posts' ),
+                                  __( 'Posts' ),
                                   //__( 'Pages' ),
                                   //__( 'Media' ),
-                                  //__( 'Comments' ),
+                                  __( 'Comments' ),
                                   __( 'Profile' ),
-                                  //__( 'Tools' ),
+                                  __( 'Tools' ),
                                   //__( 'Appearance' )
                                 );
 
