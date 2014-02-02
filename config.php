@@ -68,7 +68,7 @@ DASH;
 $demovars['footer'] = sprintf( __( 'You are currently using a demo of My Plugin. Like what you see? <a href="%s" title="Click here to download!" target="_blank">Download My Plugin today!</a>' ), 'http://mypluginurl.com' );
 
 /**Set which php files you want your demo users to be allowed to access*/
-$demovars['allow_pages'] = array('index.php', 'wp-login.php', 'options-general.php', 'admin-ajax.php', /* 'edit.php', 'post-new.php',*/ 'options.php');
+$demovars['allow_pages'] = array('index.php', 'wp-login.php', 'options-general.php', 'admin-ajax.php', 'edit.php', 'post.php', 'post-new.php', 'options.php');
 
 
 /**filters for saving options*/
